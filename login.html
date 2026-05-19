@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study App – Iniciar sesión</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-dark: #1a3ec8;
+    --blue-mid: #2563eb;
+    --blue-light: #60a5fa;
+    --teal: #10c98f;
+    --teal-dark: #0da876;
+    --white: #ffffff;
+    --gray-50: #f8faff;
+    --gray-100: #eef2ff;
+    --gray-400: #94a3b8;
+    --gray-600: #475569;
+    --shadow-blue: rgba(37, 99, 235, 0.18);
+    --shadow-teal: rgba(16, 201, 143, 0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--gray-50);
+    min-height: 100vh;
+    display: flex;
+    overflow: auto;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    flex: 1.1;
+    background: linear-gradient(145deg, #0f2fa8 0%, #1a52d9 40%, #10c98f 100%);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 50px;
+    overflow: hidden;
+  }
+  .left-panel::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    top: -120px; left: -120px;
+  }
+  .left-panel::after {
+    content: '';
+    position: absolute;
+    width: 350px; height: 350px;
+    border-radius: 50%;
+    background: rgba(16,201,143,0.12);
+    bottom: -80px; right: -80px;
+  }
+
+  .bubbles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(0) scale(1); opacity: 0.6; }
+    100% { transform: translateY(-120vh) scale(1.3); opacity: 0; }
+  }
+
+  .hero-content { position: relative; z-index: 2; text-align: center; color: white; }
+
+  .logo-wrap {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    margin-bottom: 40px;
+    animation: fadeDown 0.8s ease both;
+  }
+  .logo-img {
+    width: 230px; height: auto;
+    border-radius: 18px;
+    filter: drop-shadow(0 4px 16px rgba(16,201,143,0.5));
+  }
+
+  .hero-title {
+    font-family: 'Nunito', sans-serif; font-size: 2rem; font-weight: 800;
+    line-height: 1.25; margin-bottom: 16px;
+    animation: fadeDown 0.8s 0.15s ease both;
+  }
+  .hero-sub {
+    font-size: 1rem; font-weight: 300; color: rgba(255,255,255,0.78);
+    line-height: 1.7; max-width: 360px; margin: 0 auto 40px;
+    animation: fadeDown 0.8s 0.25s ease both;
+  }
+
+  .features { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 340px; animation: fadeDown 0.8s 0.35s ease both; }
+  .feat-item {
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 14px;
+    padding: 14px 18px; transition: transform 0.2s, background 0.2s;
+  }
+  .feat-item:hover { transform: translateX(6px); background: rgba(255,255,255,0.15); }
+  .feat-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .feat-text strong { display: block; font-size: 0.88rem; font-weight: 700; }
+  .feat-text span { font-size: 0.78rem; color: rgba(255,255,255,0.65); }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    flex: 0.9; display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 60px 50px; background: white; position: relative;
+    overflow-y: auto;
+  }
+  .right-panel::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 4px; background: linear-gradient(90deg, var(--blue-mid), var(--teal));
+  }
+
+  .form-card { width: 100%; max-width: 420px; animation: fadeUp 0.7s 0.1s ease both; }
+
+  .form-header { margin-bottom: 28px; }
+  .form-header h2 { font-family: 'Nunito', sans-serif; font-size: 1.75rem; font-weight: 800; color: #0f1d4a; margin-bottom: 6px; }
+  .form-header p { font-size: 0.88rem; color: var(--gray-400); }
+
+  .tabs { display: flex; background: var(--gray-100); border-radius: 12px; padding: 4px; margin-bottom: 24px; }
+  .tab-btn {
+    flex: 1; padding: 10px; border: none; background: transparent;
+    border-radius: 9px; font-family: 'Sora', sans-serif; font-size: 0.85rem;
+    font-weight: 600; color: var(--gray-400); cursor: pointer; transition: all 0.25s;
+  }
+  .tab-btn.active { background: white; color: var(--blue-mid); box-shadow: 0 2px 10px rgba(37,99,235,0.12); }
+
+  .field { margin-bottom: 14px; position: relative; }
+  .field label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+  .field input, .field select {
+    width: 100%; padding: 11px 16px 11px 42px;
+    border: 1.5px solid #e2e8f0; border-radius: 12px;
+    font-family: 'Sora', sans-serif; font-size: 0.88rem; color: #1e293b;
+    background: var(--gray-50); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+  }
+  .field select { padding-left: 42px; }
+  .field input:focus, .field select:focus { border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); background: white; }
+  .field-icon { position: absolute; left: 13px; top: 35px; color: var(--gray-400); pointer-events: none; }
+
+  /* Chips de materias */
+  .materias-label { font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 8px; display: block; }
+  .chips-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip {
+    padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+    border: 1.5px solid #e2e8f0; background: var(--gray-50); color: var(--gray-600);
+    cursor: pointer; transition: all 0.2s; user-select: none;
+  }
+  .chip.selected { background: #dbeafe; border-color: var(--blue-mid); color: var(--blue-mid); }
+
+  /* Chips de horarios */
+  .horarios-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+
+  .forgot { text-align: right; margin-top: -6px; margin-bottom: 14px; }
+  .forgot a { font-size: 0.78rem; color: var(--blue-mid); text-decoration: none; font-weight: 600; }
+  .forgot a:hover { text-decoration: underline; }
+
+  .submit-btn {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, var(--blue-mid), var(--blue-dark));
+    color: white; border: none; border-radius: 12px;
+    font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px var(--shadow-blue); margin-bottom: 14px; letter-spacing: 0.3px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(37,99,235,0.35); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .switch-text { text-align: center; font-size: 0.82rem; color: var(--gray-400); }
+  .switch-text a { color: var(--teal-dark); font-weight: 700; text-decoration: none; cursor: pointer; }
+  .switch-text a:hover { text-decoration: underline; }
+
+  .register-fields { display: none; }
+  .register-fields.visible { display: block; }
+
+  /* Toast / feedback */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #1e293b; color: white; padding: 12px 24px; border-radius: 30px;
+    font-size: 0.85rem; font-weight: 600; z-index: 999;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: #ef4444; }
+  .toast.success { background: #10c98f; }
+
+  .shake { animation: shake 0.4s ease; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60%  { transform: translateX(-6px); }
+    40%,80%  { transform: translateX(6px); }
+  }
+  .field input.error { border-color: #ef4444; }
+  .error-msg { font-size: 0.75rem; color: #ef4444; margin-top: 4px; display: none; }
+  .error-msg.show { display: block; }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 900px) {
+    .left-panel { display: none; }
+    .right-panel { flex: 1; min-height: 100vh; justify-content: flex-start; padding-top: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Panel izquierdo decorativo -->
+<div class="left-panel">
+  <div class="bubbles" id="bubbles"></div>
+  <div class="hero-content">
+    <div class="logo-wrap">
+      <img class="logo-img" src="Imagenes/logo.webp" alt="Study App">
+    </div>
+    <h1 class="hero-title">Conecta. Aprende.<br>Crece juntos.</h1>
+    <p class="hero-sub">La red social diseñada para estudiantes que quieren formar grupos de estudio, compartir conocimiento y alcanzar sus metas académicas.</p>
+    <div class="features">
+      <div class="feat-item">
+        <div class="feat-icon">🔍</div>
+        <div class="feat-text">
+          <strong>Encuentra tu grupo ideal</strong>
+          <span>Busca por materia, horario o universidad</span>
+        </div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon">💬</div>
+        <div class="feat-text">
+          <strong>Chat en tiempo real</strong>
+          <span>Coordina y comparte recursos fácilmente</span>
+        </div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon">🏆</div>
+        <div class="feat-text">
+          <strong>Progresa con tu comunidad</strong>
+          <span>Logros, retos y seguimiento de metas</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Panel derecho: formulario -->
+<div class="right-panel">
+  <div class="form-card">
+    <div class="form-header">
+      <h2 id="formTitle">¡Bienvenido de vuelta! 👋</h2>
+      <p id="formSub">Inicia sesión para continuar estudiando</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Iniciar sesión</button>
+      <button class="tab-btn" onclick="switchTab('register')">Registrarse</button>
+    </div>
+
+    <!-- ══ CAMPOS SOLO PARA REGISTRO ══ -->
+    <div class="register-fields" id="registerFields">
+
+      <!-- Nombre completo -->
+      <div class="field">
+        <label>Nombre completo</label>
+        <span class="field-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        <input type="text" id="nameInput" placeholder="Tu nombre completo">
+        <div class="error-msg" id="nameError">Ingresa tu nombre completo</div>
+      </div>
+
+      <!-- Universidad -->
+      <div class="field">
+        <label>Universidad</label>
+        <span class="field-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </span>
+        <input type="text" id="universidadInput" placeholder="Ej: Universidad Nacional">
+        <div class="error-msg" id="universidadError">Ingresa tu universidad</div>
+      </div>
+
+      <!-- Carrera -->
+      <div class="field">
+        <label>Carrera</label>
+        <span class="field-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </span>
+        <input type="text" id="carreraInput" placeholder="Ej: Ingeniería de Sistemas">
+        <div class="error-msg" id="carreraError">Ingresa tu carrera</div>
+      </div>
+
+      <!-- Materias de interés (chips) -->
+      <span class="materias-label">Materias de interés <span style="color:var(--gray-400);font-weight:400">(elige las que quieras)</span></span>
+      <div class="chips-wrap" id="materiasChips">
+        <span class="chip" data-val="Matemáticas">Matemáticas</span>
+        <span class="chip" data-val="Cálculo">Cálculo</span>
+        <span class="chip" data-val="Física">Física</span>
+        <span class="chip" data-val="Química">Química</span>
+        <span class="chip" data-val="Programación">Programación</span>
+        <span class="chip" data-val="Estadística">Estadística</span>
+        <span class="chip" data-val="Biología">Biología</span>
+        <span class="chip" data-val="Historia">Historia</span>
+        <span class="chip" data-val="Inglés">Inglés</span>
+        <span class="chip" data-val="Economía">Economía</span>
+        <span class="chip" data-val="Derecho">Derecho</span>
+        <span class="chip" data-val="Arte">Arte</span>
+      </div>
+
+      <!-- Horarios disponibles (chips) -->
+      <span class="materias-label">Horarios disponibles</span>
+      <div class="horarios-wrap" id="horariosChips">
+        <span class="chip" data-val="Mañana">🌅 Mañana</span>
+        <span class="chip" data-val="Tarde">☀️ Tarde</span>
+        <span class="chip" data-val="Noche">🌙 Noche</span>
+        <span class="chip" data-val="Fines de semana">📅 Fines de semana</span>
+        <span class="chip" data-val="Entre semana">📆 Entre semana</span>
+      </div>
+
+    </div><!-- /register-fields -->
+
+    <!-- Nombre de usuario -->
+    <div class="field">
+      <label>Nombre de usuario</label>
+      <span class="field-icon">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </span>
+      <input type="text" id="usernameInput" placeholder="Ej: carlos123" autocomplete="username" autocapitalize="none">
+      <div class="error-msg" id="usernameError">Ingresa tu nombre de usuario</div>
+    </div>
+
+    <!-- Correo (solo en registro, oculto visualmente con estilo inline) -->
+    <div class="field register-only" id="emailFieldWrap" style="display:none">
+      <label>Correo electrónico <span style="color:var(--gray-400);font-weight:400;font-size:0.75rem">(para recuperar tu cuenta)</span></label>
+      <span class="field-icon">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+      </span>
+      <input type="email" id="emailInput" placeholder="tu@correo.com">
+      <div class="error-msg" id="emailError">Ingresa un correo válido</div>
+    </div>
+
+    <!-- Contraseña -->
+    <div class="field">
+      <label>Contraseña</label>
+      <span class="field-icon">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </span>
+      <input type="password" id="passInput" placeholder="Mínimo 6 caracteres">
+      <div class="error-msg" id="passError">La contraseña debe tener al menos 6 caracteres</div>
+    </div>
+
+    <div class="forgot" id="forgotWrap"><a href="#" onclick="resetPassword()">¿Olvidaste tu contraseña?</a></div>
+
+    <button class="submit-btn" onclick="handleSubmit()" id="submitBtn">
+      <div class="spinner" id="spinner"></div>
+      <span id="btnText">Iniciar sesión →</span>
+    </button>
+
+    <p class="switch-text" id="switchText">
+      ¿No tienes cuenta? <a onclick="switchTab('register')">Regístrate gratis</a>
+    </p>
+  </div>
+</div>
+
+<!-- Toast de notificación -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ FIREBASE SDK ══ -->
+<script type="module">
+  import { initializeApp }                          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword,
+           signInWithEmailAndPassword,
+           sendPasswordResetEmail,
+           onAuthStateChanged }                     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc,
+           collection, query, where, getDocs,
+           serverTimestamp }                        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ════════════════════════════════════════════════════
+  //  Zona donde estara la informacion de la base de datos
+  // ════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyAJrBAhTW1D_eJyJkd9Vy_FoZWKvokPU_Q",
+  authDomain: "study-app-caaa3.firebaseapp.com",
+  projectId: "study-app-caaa3",
+  storageBucket: "study-app-caaa3.firebasestorage.app",
+  messagingSenderId: "1095017071779",
+  appId: "1:1095017071779:web:905129ca0d49801789ab16"
+};
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  // ── Si ya hay sesión activa, ir directo al menú ──
+  let registrando = false;
+  onAuthStateChanged(auth, user => {
+    if (user && !registrando) window.location.href = 'menu.html';
+  });
+
+  // ── Helpers de UI ──────────────────────────────────
+  window.showToast = function(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type;
+    setTimeout(() => t.classList.add('show'), 10);
+    setTimeout(() => t.classList.remove('show'), 3500);
+  };
+
+  function setLoading(on) {
+    const btn = document.getElementById('submitBtn');
+    document.getElementById('spinner').style.display = on ? 'block' : 'none';
+    document.getElementById('btnText').style.display = on ? 'none' : 'inline';
+    btn.disabled = on;
+  }
+
+  function getChips(containerId) {
+    return [...document.querySelectorAll(`#${containerId} .chip.selected`)]
+           .map(c => c.dataset.val);
+  }
+
+  // ── Chips interactivos ─────────────────────────────
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('selected'));
+  });
+
+  // ── Tabs ──────────────────────────────────────────
+  let currentTab = 'login';
+  window.switchTab = function(tab) {
+    currentTab = tab;
+    const btns     = document.querySelectorAll('.tab-btn');
+    const regF     = document.getElementById('registerFields');
+    const forgot   = document.getElementById('forgotWrap');
+    const emailWrap= document.getElementById('emailFieldWrap');
+    const title    = document.getElementById('formTitle');
+    const sub      = document.getElementById('formSub');
+    const btnText  = document.getElementById('btnText');
+    const switchTx = document.getElementById('switchText');
+
+    btns.forEach((b,i) => b.classList.toggle('active',
+      (i===0 && tab==='login') || (i===1 && tab==='register')));
+
+    if (tab === 'register') {
+      regF.classList.add('visible');
+      forgot.style.display  = 'none';
+      emailWrap.style.display = '';      // mostrar campo email en registro
+      title.textContent    = '¡Crea tu cuenta! 🚀';
+      sub.textContent      = 'Únete a miles de estudiantes';
+      btnText.textContent  = 'Crear cuenta gratis →';
+      switchTx.innerHTML   = '¿Ya tienes cuenta? <a onclick="switchTab(\'login\')">Inicia sesión</a>';
+    } else {
+      regF.classList.remove('visible');
+      forgot.style.display  = '';
+      emailWrap.style.display = 'none'; // ocultar email en login
+      title.textContent    = '¡Bienvenido de vuelta! 👋';
+      sub.textContent      = 'Inicia sesión para continuar estudiando';
+      btnText.textContent  = 'Iniciar sesión →';
+      switchTx.innerHTML   = '¿No tienes cuenta? <a onclick="switchTab(\'register\')">Regístrate gratis</a>';
+    }
+  };
+
+  // ── Verificar que el username sea único en Firestore ──
+  async function usernameExiste(username) {
+    const q = query(collection(db, 'estudiantes'), where('username', '==', username));
+    const snap = await getDocs(q);
+    return !snap.empty;
+  }
+
+  // ── Validación ────────────────────────────────────
+  async function validate() {
+    let ok = true;
+    const clearErr = id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('error');
+      const err = document.getElementById(id.replace('Input','Error'));
+      if (err) err.classList.remove('show');
+    };
+    const showErr = (id, msg) => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('error');
+      const err = document.getElementById(id.replace('Input','Error'));
+      if (err) { if (msg) err.textContent = msg; err.classList.add('show'); }
+      ok = false;
+    };
+
+    clearErr('usernameInput'); clearErr('passInput');
+
+    const username = document.getElementById('usernameInput').value.trim();
+    const pass     = document.getElementById('passInput').value;
+
+    // Username: solo letras, números, guión bajo, mín 3 chars
+    if (!username || username.length < 3) {
+      showErr('usernameInput', 'El usuario debe tener al menos 3 caracteres');
+    } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      showErr('usernameInput', 'Solo letras, números y guión bajo (_)');
+    }
+    if (pass.length < 6) showErr('passInput', 'La contraseña debe tener al menos 6 caracteres');
+
+    if (currentTab === 'register') {
+      clearErr('emailInput');
+      ['nameInput','universidadInput','carreraInput'].forEach(id => {
+        clearErr(id);
+        if (!document.getElementById(id).value.trim()) showErr(id);
+      });
+      const email = document.getElementById('emailInput').value.trim();
+      if (!email || !/\S+@\S+\.\S+/.test(email)) showErr('emailInput', 'Ingresa un correo válido');
+
+      // Verificar username único
+      if (ok && username.length >= 3) {
+        const existe = await usernameExiste(username.toLowerCase());
+        if (existe) showErr('usernameInput', '⚠️ Ese usuario ya está en uso, elige otro');
+      }
+    }
+
+    if (!ok) {
+      document.querySelector('.form-card').classList.add('shake');
+      setTimeout(() => document.querySelector('.form-card').classList.remove('shake'), 400);
+    }
+    return ok;
+  }
+
+  // ── Registro ──────────────────────────────────────
+  async function registrar() {
+    registrando = true;
+    const username    = document.getElementById('usernameInput').value.trim().toLowerCase();
+    const email       = document.getElementById('emailInput').value.trim();
+    const pass        = document.getElementById('passInput').value;
+    const nombre      = document.getElementById('nameInput').value.trim();
+    const universidad = document.getElementById('universidadInput').value.trim();
+    const carrera     = document.getElementById('carreraInput').value.trim();
+    const materias    = getChips('materiasChips');
+    const horarios    = getChips('horariosChips');
+
+    // 1. Crear usuario en Firebase Auth (internamente usa email)
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    const uid  = cred.user.uid;
+    console.log("✅ Usuario creado con UID:", uid);
+
+    // 2. Guardar perfil en Firestore → colección "estudiantes"
+    await setDoc(doc(db, 'estudiantes', uid), {
+      uid,
+      username,
+      nombre,
+      email,
+      universidad,
+      carrera,
+      materias,
+      horarios,
+      conexiones: [],
+      grupos: [],
+      createdAt: serverTimestamp()
+    });
+    console.log("✅ Datos guardados en Firestore OK");
+
+    // 3. Guardar mapeo username → email para poder hacer login
+    await setDoc(doc(db, 'usernames', username), { email, uid });
+    console.log("✅ Username registrado OK");
+
+    showToast('¡Cuenta creada! Bienvenido/a 🎉', 'success');
+    setTimeout(() => window.location.href = 'menu.html', 1200);
+  }
+
+  // ── Login por username ────────────────────────────
+  async function login() {
+    const username = document.getElementById('usernameInput').value.trim().toLowerCase();
+    const pass     = document.getElementById('passInput').value;
+
+    // 1. Buscar email asociado al username
+    const mapDoc = await getDoc(doc(db, 'usernames', username));
+    if (!mapDoc.exists()) {
+      showToast('❌ Usuario no encontrado', 'error');
+      return;
+    }
+    const email = mapDoc.data().email;
+
+    // 2. Login con email + contraseña en Firebase Auth
+    await signInWithEmailAndPassword(auth, email, pass);
+    window.location.href = 'menu.html';
+  }
+
+  // ── Botón principal ───────────────────────────────
+  window.handleSubmit = async function() {
+    setLoading(true);
+    try {
+      const ok = await validate();
+      if (!ok) return;
+      if (currentTab === 'register') await registrar();
+      else                           await login();
+    } catch (err) {
+      const msgs = {
+        'auth/email-already-in-use': '⚠️ Ese correo ya está registrado',
+        'auth/wrong-password':       '❌ Contraseña incorrecta',
+        'auth/too-many-requests':    '⏳ Demasiados intentos. Espera un momento',
+        'auth/invalid-credential':   '❌ Usuario o contraseña incorrectos',
+      };
+      showToast(msgs[err.code] || '❌ ' + err.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Recuperar contraseña (pide el username, busca el email) ──
+  window.resetPassword = async function() {
+    const username = document.getElementById('usernameInput').value.trim().toLowerCase();
+    if (!username) { showToast('Escribe tu usuario primero', 'error'); return; }
+    try {
+      const mapDoc = await getDoc(doc(db, 'usernames', username));
+      if (!mapDoc.exists()) { showToast('❌ Usuario no encontrado', 'error'); return; }
+      await sendPasswordResetEmail(auth, mapDoc.data().email);
+      showToast('📧 Revisa tu correo para restablecer la contraseña', 'success');
+    } catch {
+      showToast('No se pudo enviar el correo', 'error');
+    }
+  };
+
+  // ── Burbujas decorativas ──────────────────────────
+  const bc = document.getElementById('bubbles');
+  for (let i = 0; i < 12; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const s = Math.random() * 60 + 20;
+    b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;bottom:${Math.random()*-20}%;animation-duration:${Math.random()*12+8}s;animation-delay:${Math.random()*8}s;`;
+    bc.appendChild(b);
+  }
+</script>
+</body>
+</html>
