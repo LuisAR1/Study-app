@@ -308,6 +308,29 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
+  /* ── SUGERIDOS ── */
+  .sugg-widget-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+  }
+  .sugg-widget-item:last-child { border-bottom: none; }
+  .sugg-widget-avatar {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 0.85rem;
+  }
+  .sugg-widget-info { flex: 1; min-width: 0; }
+  .sugg-widget-info strong { display: block; font-size: 0.82rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sugg-widget-info span { font-size: 0.72rem; color: #94a3b8; }
+  .sugg-connect-btn {
+    flex-shrink: 0; padding: 5px 10px; border: 1.5px solid var(--blue-mid);
+    border-radius: 8px; background: transparent; color: var(--blue-mid);
+    font-family: 'Sora', sans-serif; font-size: 0.7rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .sugg-connect-btn:hover { background: var(--blue-mid); color: white; }
+  .sugg-connect-btn.pendiente { border-color: #94a3b8; color: #94a3b8; cursor: default; }
+
   @media (max-width: 1100px) { .right-sidebar { display: none; } }
   @media (max-width: 768px)  { .sidebar { display: none; } }
 </style>
@@ -458,6 +481,14 @@
       </div>
     </div>
 
+    <!-- Sugeridos -->
+    <div class="widget">
+      <div class="widget-title">Personas que quizás conozcas 🤝</div>
+      <div id="sugeridosLista">
+        <div style="font-size:0.78rem;color:#94a3b8;text-align:center;padding:10px 0">Cargando sugeridos...</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -583,6 +614,7 @@
     }
     cargarGrupos();
     escucharSolicitudes();
+    cargarSugeridos();
   });
 
   // ── Contar publicaciones del usuario ──────────────
@@ -1006,6 +1038,7 @@
       await updateDoc(doc(db,'estudiantes',deUid), { conexiones: arrayUnion(currentUser.uid) });
       await deleteDoc(doc(db,'solicitudes',solicId));
       showToast('🎉 ¡Nueva conexión!');
+      cargarSugeridos();
       // Actualizar perfil local
       if (currentPerfil) {
         currentPerfil.conexiones = [...(currentPerfil.conexiones||[]), deUid];
@@ -1037,6 +1070,87 @@
     await signOut(auth);
     window.location.href = 'login.html';
   };
+
+  // ── Sugeridos (amigos de amigos) ──────────────────
+  async function cargarSugeridos() {
+    const lista = document.getElementById('sugeridosLista');
+    if (!currentUser || !currentPerfil) {
+      lista.innerHTML = '<div style="font-size:0.78rem;color:#94a3b8;text-align:center;padding:10px 0">Inicia sesión para ver sugeridos</div>';
+      return;
+    }
+
+    const misConexiones = currentPerfil.conexiones || [];
+
+    if (misConexiones.length === 0) {
+      lista.innerHTML = '<div style="font-size:0.78rem;color:#94a3b8;text-align:center;padding:10px 0">Conéctate con alguien para ver sugeridos 👀</div>';
+      return;
+    }
+
+    try {
+      // Obtener solicitudes pendientes para saber a quiénes ya les pedimos
+      const solicSnap = await getDocs(query(collection(db,'solicitudes'), where('de','==',currentUser.uid)));
+      const pendientes = solicSnap.docs.map(d => d.data().para);
+
+      // Recoger UIDs de amigos-de-amigos
+      const candidatosMap = {}; // uid → { nombre, username, carrera, viaAmigo, color }
+      const excluidos = new Set([currentUser.uid, ...misConexiones]);
+
+      for (const amigoUid of misConexiones) {
+        const amigoSnap = await getDoc(doc(db, 'estudiantes', amigoUid));
+        if (!amigoSnap.exists()) continue;
+        const amigo = amigoSnap.data();
+        const amigoNombre = amigo.nombre || amigo.username || 'Estudiante';
+
+        for (const candidatoUid of (amigo.conexiones || [])) {
+          if (excluidos.has(candidatoUid)) continue;
+          if (!candidatosMap[candidatoUid]) {
+            candidatosMap[candidatoUid] = { viaAmigos: [amigoNombre] };
+          } else {
+            candidatosMap[candidatoUid].viaAmigos.push(amigoNombre);
+          }
+        }
+      }
+
+      const uids = Object.keys(candidatosMap).slice(0, 5);
+
+      if (uids.length === 0) {
+        lista.innerHTML = '<div style="font-size:0.78rem;color:#94a3b8;text-align:center;padding:10px 0">No hay sugeridos por ahora 🌱</div>';
+        return;
+      }
+
+      // Cargar datos de cada candidato
+      const perfiles = await Promise.all(uids.map(uid => getDoc(doc(db,'estudiantes',uid))));
+
+      lista.innerHTML = perfiles.map(snap => {
+        if (!snap.exists()) return '';
+        const u = snap.data();
+        const uid = snap.id;
+        const ini = (u.username || u.nombre || '?').charAt(0).toUpperCase();
+        const color = colorDeterminista(uid);
+        const via = candidatosMap[uid].viaAmigos;
+        const viaTexto = via.length === 1
+          ? `Amigo/a de ${via[0]}`
+          : `Amigo/a de ${via[0]} y ${via.length - 1} más`;
+        const yaPendiente = pendientes.includes(uid);
+
+        return `<div class="sugg-widget-item">
+          <div class="sugg-widget-avatar" style="background:linear-gradient(135deg,${color},${color}cc)">${ini}</div>
+          <div class="sugg-widget-info" onclick="verPerfil('${uid}')" style="cursor:pointer">
+            <strong>${u.nombre || u.username || 'Estudiante'}</strong>
+            <span>${viaTexto}</span>
+          </div>
+          ${yaPendiente
+            ? `<button class="sugg-connect-btn pendiente">⏳</button>`
+            : `<button class="sugg-connect-btn" onclick="enviarSolicitud('${uid}',this)">+ Conectar</button>`
+          }
+        </div>`;
+      }).join('');
+
+    } catch(e) {
+      console.error('Error cargando sugeridos:', e);
+      lista.innerHTML = '<div style="font-size:0.78rem;color:#94a3b8;text-align:center;padding:10px 0">No se pudieron cargar</div>';
+    }
+  }
 
   // ── Toast ─────────────────────────────────────────
   function showToast(msg) {
