@@ -1,6 +1,6 @@
 # Study App
 
-Study App es una aplicacion web para estudiantes que quieren crear grupos de estudio, encontrar companeros, gestionar conexiones y visualizar una red de estudiantes.
+Study App es una aplicacion web para estudiantes que quieren crear grupos de estudio, encontrar compañeros, gestionar conexiones y visualizar una red de estudiantes.
 
 ## Objetivo del proyecto
 
@@ -27,10 +27,8 @@ La app actualmente esta construida con archivos HTML que contienen estructura, e
 
 Antes de agregar nuevas funcionalidades, el primer objetivo es ordenar el proyecto:
 
-1. Definir una sola carpeta activa del proyecto.
-2. Inicializar o confirmar Git.
-3. Separar CSS y JavaScript de los HTML.
-4. Centralizar la configuracion de Firebase.
-5. Documentar el modelo de datos de Firestore.
-6. Mejorar manejo de errores y seguridad.
+1. Separar CSS y JavaScript de los HTML.
+2. Centralizar la configuracion de Firebase.
+3. Documentar el modelo de datos de Firestore.
+4. Mejorar manejo de errores y seguridad.
 
